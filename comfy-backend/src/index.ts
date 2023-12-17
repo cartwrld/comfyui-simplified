@@ -1,34 +1,39 @@
 import * as express from 'express'
-import * as bodyParser from 'body-parser'
 import { AppDataSource } from './data-source'
 import * as createError from 'http-errors'
 import * as cors from 'cors'
 import { RouteDefinition } from './decorator/RouteDefinition'
-import {GenerateController} from './controller/GenerateController'
-import {Workflow} from "./entity/Workflow";
-import {Express} from "express";
+import { GenerateController } from './controller/GenerateController'
+import { Express } from 'express'
+import * as path from 'path'
+import * as fs from 'fs'
+import { CheckImageController } from './controller/CheckImageController'
+import { join } from 'path'
 
 const port = 3004
 
 AppDataSource.initialize().then(async () => {
   // create express app
-  const app : Express = express()
+  const app: Express = express()
+
+  // app.use('/images', express.static('D:/ComfyUI/ComfyUI/output'))
+  app.use('/images', express.static(path.join(__dirname, 'images')))
+  // app.use('/images', express.static(join(__dirname, '..', 'images')))
+
   app.use(express.json())
 
   const corsOptions = {
     origin: 'http://localhost:3000', // allow to server to accept request from different origin
-    credentials: true,  // This allows session cookie from browser to pass through
+    credentials: true, // This allows session cookie from browser to pass through
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization'
-  };
+  }
 
   // If you want to set specific options for CORS:
-  app.use(cors(corsOptions));
-
-
+  app.use(cors(corsOptions))
 
   // Iterate over all our controllers and register our routes
-  const controllers: any[] = [GenerateController]
+  const controllers: any[] = [GenerateController, CheckImageController]
   controllers.forEach((controller) => {
     // This is our instantiated class
     // eslint-disable-next-line new-cap

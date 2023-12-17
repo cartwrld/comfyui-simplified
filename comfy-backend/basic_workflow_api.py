@@ -42,11 +42,12 @@ save_image_node = prompt_workflow["7"]
 # load the props from the front end
 props = json.load(open('props.json'))
 
+chkpoint_loader_node["inputs"]["ckpt_name"] = "dynavision_0557.safetensors"
 # load the checkpoint that we want.
-if props.get('sdxl'):  # This checks if props['sdxl'] is True
-    chkpoint_loader_node["inputs"]["ckpt_name"] = "dynavision_0557.safetensors"
-else:
-    chkpoint_loader_node["inputs"]["ckpt_name"] = "rc_realistic_v7.safetensors"
+# if props.get('sdxl'):  # This checks if props['sdxl'] is True
+#     chkpoint_loader_node["inputs"]["ckpt_name"] = "dynavision_0557.safetensors"
+# else:
+#     chkpoint_loader_node["inputs"]["ckpt_name"] = "rc_realistic_v7.safetensors"
 
 # set image dimensions and batch size in EmptyLatentImage node
 empty_latent_img_node["inputs"]["width"] = props.get('width')
@@ -64,6 +65,12 @@ prompt_pos_node["inputs"]["text"] = props.get('prompt')
 # set a random seed in KSampler node
 ksampler_node["inputs"]["seed"] = random.randint(1, 18446744073709551614)
 
+# set the number of steps from the user input
+ksampler_node["inputs"]["steps"] = props.get('steps')
+
+# set the cfg from the user input
+ksampler_node["inputs"]["cfg"] = props.get('cfg')
+
 #     # if it is the last prompt
 #     if index == 3:
 #         # set latent image height to 768
@@ -71,13 +78,15 @@ ksampler_node["inputs"]["seed"] = random.randint(1, 18446744073709551614)
 
 # set filename prefix to be the same as prompt
 # (truncate to first 100 chars if necessary)
-# fileprefix = props.get('prompt')
-fileprefix = 'chakreact'
+fileprefix = props.get('prompt')
+# fileprefix = 'chakreact'
 if len(fileprefix) > 100:
     fileprefix = fileprefix[:100]
 
-save_image_node["inputs"]["filename_prefix"] = fileprefix
+save_image_node["inputs"]["filename_prefix"] = props.get('prefix')
 
 # everything set, add entire workflow to queue.
 queue_prompt(prompt_workflow)
+
+print(f"FILENAME: {props.get('prefix')}")
 
